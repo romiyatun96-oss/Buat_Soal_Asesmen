@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher AI Generator - Modul Soal & Asesmen</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- html2pdf.js for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            blue: '#0052cc',
+                            darkBlue: '#0c2340',
+                            lightBlue: '#ebf3ff',
+                            green: '#059669',
+                            lightGreen: '#ecfdf5',
+                            orange: '#ea580c',
+                            lightOrange: '#fff7ed',
+                            purple: '#7c3aed',
+                            lightPurple: '#f5f3ff',
+                            yellow: '#fbbf24'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        /* Custom styling for rendered generator output */
+        .prose-custom {
+            color: #1e293b;
+            line-height: 1.6;
+        }
+        .prose-custom h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #0f172a;
+            border-bottom: 2px solid #cbd5e1;
+            padding-bottom: 0.25rem;
+        }
+        .prose-custom h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: #1e3a8a;
+        }
+        .prose-custom h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            color: #2563eb;
+        }
+        .prose-custom table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+        }
+        .prose-custom th, .prose-custom td {
+            border: 1px solid #cbd5e1;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        .prose-custom th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+        }
+        .prose-custom ul, .prose-custom ol {
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .prose-custom ul { list-style-type: disc; }
+        .prose-custom ol { list-style-type: decimal; }
+        .prose-custom p { margin-bottom: 0.75rem; }
+        .prose-custom blockquote {
+            border-left: 4px solid #3b82f6;
+            padding-left: 1rem;
+            background-color: #eff6ff;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        /* Toggle switch design */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #3b82f6;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #3b82f6;
+        }
+
+        /* Printable area styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printableArea, #printableArea * {
+                visibility: visible;
+            }
+            #printableArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 20px;
+                background: white;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+
+    <!-- TOP HEADER BANNER -->
+    <header class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white pt-6 pb-12 px-4 shadow-lg relative overflow-hidden">
+        <!-- Background decorative elements -->
+        <div class="absolute -top-12 -right-12 w-64 h-64 bg-blue-500 rounded-full opacity-20 filter blur-3xl"></div>
+        <div class="absolute bottom-0 left-10 w-48 h-48 bg-indigo-500 rounded-full opacity-20 filter blur-2xl"></div>
+
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+            <div>
+                <!-- Brand Badge -->
+                <div class="inline-flex items-center gap-2 bg-blue-950/80 border border-blue-400/30 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-blue-200 mb-3 shadow-inner">
+                    <span class="bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">TEACHER</span>
+                    MUHADESTA
+                </div>
+                
+                <!-- Main Header Title -->
+                <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight mb-2 text-white drop-shadow-md">
+                    TEACHER AI GENERATOR
+                </h1>
+                
+                <!-- Subtitle Pill -->
+                <div class="inline-block bg-yellow-400 text-blue-950 font-bold px-4 py-1 rounded-full text-sm shadow-md">
+                    ✨ Asisten Digital untuk Membantu Pekerjaan Guru
+                </div>
+            </div>
+
+            <!-- Header Avatar Illustration -->
+            <div class="flex items-center gap-4 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 shadow-xl">
+                <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-300 to-yellow-500 flex items-center justify-center text-3xl shadow-inner border-2 border-white">
+                    👩‍🏫
+                </div>
+                <div>
+                    <h3 class="font-bold text-white text-base">Siap Membantu Ibu & Bapak Guru!</h3>
+                    <p class="text-xs text-blue-100">Buat soal HOTS, LOTS, Rubrik, dan Kunci Jawaban instan.</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-6xl mx-auto px-4 -mt-6 relative z-20">
+
+        <!-- Banner Title Box -->
+        <div class="bg-white rounded-2xl p-6 shadow-md border border-slate-200 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center text-2xl flex-shrink-0 shadow-md">
+                    <i class="fa-solid fa-clipboard-question"></i>
+                </div>
+                <div>
+                    <div class="text-xs font-bold text-amber-600 uppercase tracking-wide">MODUL GENERATOR</div>
+                    <h2 class="text-2xl font-bold text-slate-800">Soal & Asesmen</h2>
+                    <p class="text-sm text-slate-600">Buat soal dan asesmen berkualitas sesuai tujuan pembelajaran dengan cepat dan mudah!</p>
+                </div>
+            </div>
+
+            <!-- Quick Template Presets -->
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs font-medium text-slate-500 w-full md:w-auto">Isi Otomatis Contoh:</span>
+                <button onclick="loadPreset('ipa')" class="text-xs bg-slate-100 hover:bg-blue-50 text-blue-700 border border-slate-300 px-3 py-1.5 rounded-lg transition font-medium flex items-center gap-1">
+                    🔬 IPA SMP (Ekosistem)
+                </button>
+                <button onclick="loadPreset('mtk')" class="text-xs bg-slate-100 hover:bg-blue-50 text-blue-700 border border-slate-300 px-3 py-1.5 rounded-lg transition font-medium flex items-center gap-1">
+                    📐 Mtk SD (Pecahan)
+                </button>
+                <button onclick="loadPreset('indo')" class="text-xs bg-slate-100 hover:bg-blue-50 text-blue-700 border border-slate-300 px-3 py-1.5 rounded-lg transition font-medium flex items-center gap-1">
+                    📖 B.Indo SMA
+                </button>
+            </div>
+        </div>
+
+        <!-- FORM WRAPPER -->
+        <form id="generatorForm" onsubmit="event.preventDefault(); generateAssessment();" class="space-y-8">
+
+            <!-- STEP 1: INFORMASI DASAR -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-blue-50 border-b border-blue-100 p-4 md:p-6 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-xl shadow-md">
+                        1
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-blue-600 uppercase tracking-wider">STEP 1</div>
+                        <h3 class="text-lg font-bold text-blue-950">INFORMASI DASAR</h3>
+                        <p class="text-xs text-blue-700">Lengkapi informasi dasar asesmen yang Anda buat</p>
+                    </div>
+                </div>
+
+                <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Mata Pelajaran -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-book text-blue-600"></i> Mata Pelajaran
+                        </label>
+                        <select id="mataPelajaran" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:bg-white transition" onchange="updateSummary()">
+                            <option value="IPA">IPA (Ilmu Pengetahuan Alam)</option>
+                            <option value="IPS">IPS (Ilmu Pengetahuan Sosial)</option>
+                            <option value="Matematika">Matematika</option>
+                            <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                            <option value="Bahasa Inggris">Bahasa Inggris</option>
+                            <option value="Pendidikan Pancasila">Pendidikan Pancasila / PKn</option>
+                            <option value="PAI & Budi Pekerti">PAI & Budi Pekerti</option>
+                            <option value="Informatika">Informatika / TIK</option>
+                            <option value="Seni Budaya">Seni Budaya & Prakarya</option>
+                            <option value="PJOK">PJOK (Olahraga)</option>
+                        </select>
+                    </div>
+
+                    <!-- Kelas / Fase -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-users-rectangle text-blue-600"></i> Kelas / Fase
+                        </label>
+                        <select id="kelasFase" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:bg-white transition" onchange="updateSummary()">
+                            <option value="VII / Fase D">Kelas VII / Fase D (SMP)</option>
+                            <option value="VIII / Fase D">Kelas VIII / Fase D (SMP)</option>
+                            <option value="IX / Fase D">Kelas IX / Fase D (SMP)</option>
+                            <option value="I / Fase A">Kelas I / Fase A (SD)</option>
+                            <option value="II / Fase A">Kelas II / Fase A (SD)</option>
+                            <option value="III / Fase B">Kelas III / Fase B (SD)</option>
+                            <option value="IV / Fase B">Kelas IV / Fase B (SD)</option>
+                            <option value="V / Fase C">Kelas V / Fase C (SD)</option>
+                            <option value="VI / Fase C">Kelas VI / Fase C (SD)</option>
+                            <option value="X / Fase E">Kelas X / Fase E (SMA/SMK)</option>
+                            <option value="XI / Fase F">Kelas XI / Fase F (SMA/SMK)</option>
+                            <option value="XII / Fase F">Kelas XII / Fase F (SMA/SMK)</option>
+                        </select>
+                    </div>
+
+                    <!-- Materi / Topik -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-leaf text-green-600"></i> Materi / Topik
+                        </label>
+                        <input type="text" id="materiTopik" value="Ekosistem dan Interaksi Makhluk Hidup" placeholder="Tuliskan materi / topik" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:bg-white transition" oninput="updateSummary()">
+                    </div>
+
+                    <!-- Tujuan Pembelajaran -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-bullseye text-red-500"></i> Tujuan Pembelajaran
+                        </label>
+                        <input type="text" id="tujuanPembelajaran" value="Menganalisis komponen ekosistem dan rantai makanan dalam lingkungan sekitar" placeholder="Tuliskan tujuan pembelajaran" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:bg-white transition" oninput="updateSummary()">
+                    </div>
+
+                    <!-- Alokasi Waktu Pengerjaan -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 flex items-center gap-2">
+                            <i class="fa-regular fa-clock text-blue-600"></i> Alokasi Waktu Pengerjaan
+                        </label>
+                        <select id="alokasiWaktu" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:bg-white transition" onchange="updateSummary()">
+                            <option value="45 menit">45 menit</option>
+                            <option value="60 menit" selected>60 menit</option>
+                            <option value="75 menit">75 menit</option>
+                            <option value="90 menit">90 menit</option>
+                            <option value="120 menit">120 menit</option>
+                        </select>
+                    </div>
+
+                    <!-- Jumlah Peserta Didik (Opsional) -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-user-group text-blue-600"></i> Jumlah Peserta Didik (Opsional)
+                        </label>
+                        <input type="text" id="jumlahPeserta" value="32 siswa" placeholder="Contoh: 32 siswa" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:bg-white transition" oninput="updateSummary()">
+                    </div>
+
+                    <!-- Cakupan Materi -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-layer-group text-blue-600"></i> Cakupan Materi
+                        </label>
+                        <select id="cakupanMateri" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
+                            <option value="Formatif (Sub-bab)">Formatif (Sub-bab)</option>
+                            <option value="Sumatif Lingkup Materi (Bab)">Sumatif Lingkup Materi (Bab)</option>
+                            <option value="Sumatif Akhir Semester (SAS)">Sumatif Akhir Semester (SAS)</option>
+                            <option value="Quiz Harian">Quiz Harian</option>
+                        </select>
+                    </div>
+
+                    <!-- Bentuk Asesmen -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 flex items-center gap-2">
+                            <i class="fa-regular fa-file-lines text-blue-600"></i> Bentuk Asesmen
+                        </label>
+                        <select id="bentukAsesmen" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:bg-white transition" onchange="updateSummary()">
+                            <option value="Pilihan Ganda & MCMA">Pilihan Ganda, MCMA & Uraian</option>
+                            <option value="Tes Tertulis Campuran">Tes Tertulis Campuran (PG, Menjodohkan, Esai)</option>
+                            <option value="Quiz Singkat">Quiz Singkat</option>
+                            <option value="Unjuk Kerja / Praktik">Unjuk Kerja / Praktik</option>
+                            <option value="Portofolio">Portofolio & Penugasan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tips Banner -->
+                <div class="mx-6 mb-6 bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-3 text-xs text-amber-900">
+                    <span class="text-base">💡</span>
+                    <span><strong>Tips:</strong> Semakin lengkap informasi yang Anda berikan, semakin baik hasil soal & asesmen yang dihasilkan AI.</span>
+                </div>
+            </div>
+
+            <!-- STEP 2: TUJUAN & KARAKTERISTIK -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-emerald-50 border-b border-emerald-100 p-4 md:p-6 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-emerald-600 text-white flex items-center justify-center font-black text-xl shadow-md">
+                        2
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider">STEP 2</div>
+                        <h3 class="text-lg font-bold text-emerald-950">TUJUAN & KARAKTERISTIK</h3>
+                        <p class="text-xs text-emerald-700">Tentukan tujuan asesmen dan gaya belajar peserta didik</p>
+                    </div>
+                </div>
+
+                <div class="p-6 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <!-- Tingkat Kognitif -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-3">
+                                Tingkat Kognitif <span class="text-slate-400 font-normal">(Pilih level yang ingin digunakan)</span>
+                            </label>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-3 text-sm text-slate-700 font-medium cursor-pointer">
+                                    <input type="checkbox" name="kognitif" value="LOTS" checked class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500" onchange="updateSummary()">
+                                    <span><strong class="text-emerald-700">LOTS</strong> (Mengingat, Memahami)</span>
+                                </label>
+                                <label class="flex items-center gap-3 text-sm text-slate-700 font-medium cursor-pointer">
+                                    <input type="checkbox" name="kognitif" value="MOTS" checked class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500" onchange="updateSummary()">
+                                    <span><strong class="text-emerald-700">MOTS</strong> (Menganalisis / Mengaplikasikan)</span>
+                                </label>
+                                <label class="flex items-center gap-3 text-sm text-slate-700 font-medium cursor-pointer">
+                                    <input type="checkbox" name="kognitif" value="HOTS" checked class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500" onchange="updateSummary()">
+                                    <span><strong class="text-emerald-700">HOTS</strong> (Menganalisis, Mengevaluasi, Mencipta)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Jenis Soal -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-3">
+                                Jenis Soal <span class="text-slate-400 font-normal">(Pilih jenis soal yang diinginkan)</span>
+                            </label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-center gap-2 text-sm text-slate-700 font-medium cursor-pointer">
+                                    <input type="checkbox" name="jenisSoal" value="Pilihan Ganda" checked class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500" onchange="updateSummary()">
+                                    <span>Pilihan Ganda</span>
+                                </label>
+                                <label class="flex items-center gap-2 text-sm text-slate-700 font-medium cursor-pointer">
+                                    <input type="checkbox" name="jenisSoal" value="Benar/Salah" class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500" onchange="updateSummary()">
+                                    <span>Benar/Salah</span>
+                                </label>
+                                <label class="flex items-center gap-2 text-sm text-slate-700 font-medium cursor-pointer">
+                                    <input type="checkbox" name="jenisSoal" value="Pilihan Ganda Kompleks (MCMA)" checked class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500" onchange="updateSummary()">
+                                    <span>Pilihan Ganda Kompleks (MCMA)</span>
+                                </label>
+                                <label class="flex items-center gap-2 text-sm text-slate-700 font-medium cursor-pointer">
+                                    <input type="checkbox" name="jenisSoal" value="Esai / Uraian" checked class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500" onchange="updateSummary()">
+                                    <span>Esai / Uraian</span>
+                                </label>
+                                <label class="flex items-center gap-2 text-sm text-slate-700 font-medium cursor-pointer col-span-2">
+                                    <input type="checkbox" name="jenisSoal" value="Menjodohkan" class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500" onchange="updateSummary()">
+                                    <span>Menjodohkan</span>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Gaya Belajar -->
+                    <div class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-3">
+                            Gaya Belajar <span class="text-slate-400 font-normal">(Pilih gaya belajar peserta didik)</span>
+                        </label>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <label class="flex items-center justify-center gap-3 bg-white p-3 rounded-xl border border-slate-200 hover:border-emerald-500 cursor-pointer transition shadow-sm">
+                                <input type="checkbox" name="gayaBelajar" value="Visual" checked class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500">
+                                <span class="text-xl">👁️</span>
+                                <span class="text-sm font-semibold text-slate-800">Visual</span>
+                            </label>
+
+                            <label class="flex items-center justify-center gap-3 bg-white p-3 rounded-xl border border-slate-200 hover:border-emerald-500 cursor-pointer transition shadow-sm">
+                                <input type="checkbox" name="gayaBelajar" value="Auditori" class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500">
+                                <span class="text-xl">👂</span>
+                                <span class="text-sm font-semibold text-slate-800">Auditori</span>
+                            </label>
+
+                            <label class="flex items-center justify-center gap-3 bg-white p-3 rounded-xl border border-slate-200 hover:border-emerald-500 cursor-pointer transition shadow-sm">
+                                <input type="checkbox" name="gayaBelajar" value="Kinestetik" class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500">
+                                <span class="text-xl">✋</span>
+                                <span class="text-sm font-semibold text-slate-800">Kinestetik</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: STRUKTUR & PREFERENSI SOAL -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-orange-50 border-b border-orange-100 p-4 md:p-6 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-orange-600 text-white flex items-center justify-center font-black text-xl shadow-md">
+                        3
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-orange-600 uppercase tracking-wider">STEP 3</div>
+                        <h3 class="text-lg font-bold text-orange-950">STRUKTUR & PREFERENSI SOAL</h3>
+                        <p class="text-xs text-orange-700">Atur struktur, jumlah soal dan preferensi asesmen Anda</p>
+                    </div>
+                </div>
+
+                <div class="p-6 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Jumlah Soal -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Jumlah Soal</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="jumlahSoal" value="10" min="1" max="50" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-orange-500" oninput="updateSummary()">
+                                <span class="text-sm font-medium text-slate-500">soal</span>
+                            </div>
+                        </div>
+
+                        <!-- Tingkat Kesulitan -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Tingkat Kesulitan</label>
+                            <select id="tingkatKesulitan" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-orange-500">
+                                <option value="Campuran (Mudah-Sedang-Sulit)">Campuran (Mudah-Sedang-Sulit)</option>
+                                <option value="Dominan Mudah">Dominan Mudah</option>
+                                <option value="Dominan Sedang">Dominan Sedang</option>
+                                <option value="Dominan Sulit (HOTS Focus)">Dominan Sulit (HOTS Focus)</option>
+                            </select>
+                        </div>
+
+                        <!-- Distribusi Tingkat Kesulitan -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Distribusi Tingkat Kesulitan</label>
+                            <div class="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-50 p-2 border border-slate-300 rounded-xl">
+                                <div>Mudah: <span class="text-orange-600">30%</span></div>
+                                <div>• Sedang: <span class="text-orange-600">40%</span></div>
+                                <div>• Sulit: <span class="text-orange-600">30%</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Format Output -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Format Output</label>
+                            <select id="formatOutput" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-orange-500">
+                                <option value="Tabel & Kunci Jawaban">Tabel & Kunci Jawaban</option>
+                                <option value="Soal + Jawaban Terpisah">Soal + Jawaban Terpisah</option>
+                                <option value="Lembar Kerja Siswa Lengkap">Lembar Kerja Siswa Lengkap</option>
+                            </select>
+                        </div>
+
+                        <!-- Bahasa Soal -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Bahasa Soal</label>
+                            <select id="bahasaSoal" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-orange-500" onchange="updateSummary()">
+                                <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                                <option value="Bahasa Inggris">Bahasa Inggris</option>
+                                <option value="Bahasa Jawa">Bahasa Jawa</option>
+                            </select>
+                        </div>
+
+                        <!-- Sertakan Pembahasan Toggle -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Sertakan Pembahasan</label>
+                            <div class="flex items-center gap-3 mt-1">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="sertakanPembahasan" checked class="sr-only peer" onchange="updateSummary()">
+                                    <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                                </label>
+                                <span class="text-sm font-semibold text-slate-700" id="pembahasanLabel">Ya, Sertakan</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preferensi Lain (Opsional) -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Preferensi Lain (Opsional)</label>
+                        <input type="text" id="preferensiLain" placeholder="Contoh: Gunakan konteks lokal, sertakan stimulus gambar/cerita, dll." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-orange-500">
+                    </div>
+
+                    <div class="bg-amber-50 rounded-xl p-3 border border-amber-200 text-xs text-amber-900 flex items-center gap-2">
+                        <span>⭐</span>
+                        <span>Anda dapat menyesuaikan struktur dan preferensi sesuai kebutuhan asesmen Anda.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 4: REVIEW & GENERATE -->
+            <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl shadow-sm border border-purple-200 overflow-hidden">
+                <div class="bg-purple-600 text-white p-4 md:p-6 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-white text-purple-700 flex items-center justify-center font-black text-xl shadow-md">
+                        4
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-purple-200 uppercase tracking-wider">STEP 4</div>
+                        <h3 class="text-lg font-bold text-white">GENERATE SOAL & ASESMEN</h3>
+                        <p class="text-xs text-purple-100">Periksa kembali informasi Anda, lalu generate soal & asesmen terbaik!</p>
+                    </div>
+                </div>
+
+                <div class="p-6 space-y-6">
+                    <p class="text-xs font-bold text-slate-600 uppercase tracking-wider">Pastikan semua informasi sudah sesuai sebelum membuat soal & asesmen.</p>
+
+                    <!-- Summary Grid Card -->
+                    <div class="bg-white rounded-xl p-5 border border-purple-200 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 text-sm">
+                        <div class="flex items-start gap-2">
+                            <span class="text-slate-400 min-w-[130px] font-medium"><i class="fa-solid fa-book text-purple-500 w-5"></i> Mata Pelajaran</span>
+                            <span class="font-bold text-slate-800" id="summaryMataPelajaran">: IPA</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-slate-400 min-w-[130px] font-medium"><i class="fa-solid fa-brain text-purple-500 w-5"></i> Tingkat Kognitif</span>
+                            <span class="font-bold text-slate-800" id="summaryKognitif">: LOTS + MOTS + HOTS</span>
+                        </div>
+
+                        <div class="flex items-start gap-2">
+                            <span class="text-slate-400 min-w-[130px] font-medium"><i class="fa-solid fa-users-rectangle text-purple-500 w-5"></i> Kelas / Fase</span>
+                            <span class="font-bold text-slate-800" id="summaryKelasFase">: VII / Fase D</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-slate-400 min-w-[130px] font-medium"><i class="fa-solid fa-list-check text-purple-500 w-5"></i> Jenis Soal</span>
+                            <span class="font-bold text-slate-800" id="summaryJenisSoal">: PG, MCMA, Esai</span>
+                        </div>
+
+                        <div class="flex items-start gap-2">
+                            <span class="text-slate-400 min-w-[130px] font-medium"><i class="fa-solid fa-leaf text-purple-500 w-5"></i> Materi / Topik</span>
+                            <span class="font-bold text-slate-800" id="summaryMateriTopik">: Ekosistem</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-slate-400 min-w-[130px] font-medium"><i class="fa-solid fa-hashtag text-purple-500 w-5"></i> Jumlah Soal</span>
+                            <span class="font-bold text-slate-800" id="summaryJumlahSoal">: 10 soal</span>
+                        </div>
+
+                        <div class="flex items-start gap-2">
+                            <span class="text-slate-400 min-w-[130px] font-medium"><i class="fa-regular fa-clock text-purple-500 w-5"></i> Alokasi Waktu</span>
+                            <span class="font-bold text-slate-800" id="summaryAlokasiWaktu">: 60 menit</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-slate-400 min-w-[130px] font-medium"><i class="fa-solid fa-language text-purple-500 w-5"></i> Bahasa Soal</span>
+                            <span class="font-bold text-slate-800" id="summaryBahasaSoal">: Bahasa Indonesia</span>
+                        </div>
+
+                        <div class="flex items-start gap-2">
+                            <span class="text-slate-400 min-w-[130px] font-medium"><i class="fa-solid fa-users text-purple-500 w-5"></i> Jumlah Peserta</span>
+                            <span class="font-bold text-slate-800" id="summaryJumlahPeserta">: 32 siswa</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-slate-400 min-w-[130px] font-medium"><i class="fa-solid fa-check-double text-purple-500 w-5"></i> Sertakan Pembahasan</span>
+                            <span class="font-bold text-slate-800" id="summaryPembahasan">: Ya</span>
+                        </div>
+
+                        <div class="flex items-start gap-2 md:col-span-2">
+                            <span class="text-slate-400 min-w-[130px] font-medium"><i class="fa-regular fa-file-lines text-purple-500 w-5"></i> Bentuk Asesmen</span>
+                            <span class="font-bold text-slate-800" id="summaryBentukAsesmen">: Pilihan Ganda, MCMA & Uraian</span>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <div class="text-center pt-2">
+                        <button type="submit" id="btnGenerate" class="w-full md:w-auto px-10 py-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-extrabold text-lg rounded-2xl shadow-xl hover:shadow-2xl hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-3 mx-auto">
+                            <i class="fa-solid fa-wand-magic-sparkles text-xl text-yellow-300"></i>
+                            GENERATE SOAL & ASESMEN
+                        </button>
+                        <p class="text-xs text-slate-500 mt-3 flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-lock text-slate-400"></i> AI akan membuat soal & asesmen sesuai informasi yang Anda berikan.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+        </form>
+
+        <!-- GENERATED RESULT CONTAINER -->
+        <section id="resultSection" class="mt-10 hidden">
+            
+            <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+                <!-- Result Toolbar Header -->
+                <div class="bg-slate-900 text-white p-4 md:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold text-lg shadow-md">
+                            <i class="fa-solid fa-file-circle-check"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white">Hasil Soal & Asesmen AI</h3>
+                            <p class="text-xs text-slate-400">Siap digunakan, diubah, atau diunduh ke Word & PDF</p>
+                        </div>
+                    </div>
+
+                    <!-- DOWNLOAD & ACTION BUTTONS -->
+                    <div class="flex flex-wrap items-center gap-2 no-print">
+                        <!-- Download Word Button -->
+                        <button onclick="exportToWord()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-md">
+                            <i class="fa-solid fa-file-word text-sm text-blue-200"></i> Unduh Word (.doc)
+                        </button>
+
+                        <!-- Download PDF Button -->
+                        <button onclick="exportToPDF()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-md">
+                            <i class="fa-solid fa-file-pdf text-sm text-red-200"></i> Unduh PDF (.pdf)
+                        </button>
+
+                        <!-- Copy Button -->
+                        <button onclick="copyGeneratedText()" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md">
+                            <i class="fa-solid fa-copy"></i> Salin
+                        </button>
+
+                        <!-- Print Button -->
+                        <button onclick="window.print()" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md">
+                            <i class="fa-solid fa-print"></i> Cetak
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Generated Content Output View -->
+                <div class="p-6 md:p-10 bg-white">
+                    <div id="printableArea" class="prose-custom max-w-none">
+                        <!-- AI output will be rendered here via Marked.js -->
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="mt-12 text-center text-xs text-slate-500 space-y-2">
+            <div class="flex items-center justify-center gap-2 font-medium">
+                <span class="text-amber-500 text-base">💡</span>
+                <strong>INGAT!</strong> AI adalah asisten Anda. Guru hebat tetap yang paling berharga!
+            </div>
+            <p>Gunakan hasil AI dengan bijak, sesuaikan dengan kebutuhan kelas Anda.</p>
+            <p class="text-slate-400">© 2026 Teacher Muhadesta AI Assistant. Powered by Gemini API.</p>
+        </footer>
+
+    </main>
+
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full text-center space-y-4 mx-4">
+            <div class="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <h3 class="text-lg font-bold text-slate-800">Menyusun Soal & Asesmen...</h3>
+            <p class="text-xs text-slate-600">AI sedang menganalisis tujuan pembelajaran, tingkat kognitif, dan preferensi soal Anda.</p>
+            <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-600 to-blue-600 h-full w-2/3 animate-pulse"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Preset sample templates
+        const presets = {
+            ipa: {
+                mataPelajaran: 'IPA',
+                kelasFase: 'VII / Fase D',
+                materiTopik: 'Ekosistem dan Interaksi Makhluk Hidup',
+                tujuanPembelajaran: 'Menganalisis komponen biotik, abiotik, dan rantai makanan dalam ekosistem',
+                alokasiWaktu: '60 menit',
+                jumlahPeserta: '32 siswa',
+                cakupanMateri: 'Sumatif Lingkup Materi (Bab)',
+                bentukAsesmen: 'Pilihan Ganda & MCMA',
+                jumlahSoal: '10',
+                tingkatKesulitan: 'Campuran (Mudah-Sedang-Sulit)',
+                bahasaSoal: 'Bahasa Indonesia',
+                preferensiLain: 'Gunakan contoh ekosistem lokal Indonesia (seperti sawah dan hutan mangrove).'
+            },
+            mtk: {
+                mataPelajaran: 'Matematika',
+                kelasFase: 'IV / Fase B',
+                materiTopik: 'Pecahan Senilai dan Operasi Pecahan',
+                tujuanPembelajaran: 'Membandingkan dan mengurutkan antar pecahan senilai menggunakan gambar konkret',
+                alokasiWaktu: '45 menit',
+                jumlahPeserta: '28 siswa',
+                cakupanMateri: 'Formatif (Sub-bab)',
+                bentukAsesmen: 'Tes Tertulis Campuran',
+                jumlahSoal: '8',
+                tingkatKesulitan: 'Dominan Sedang',
+                bahasaSoal: 'Bahasa Indonesia',
+                preferensiLain: 'Sertakan ilustrasi cerita kue / buah pizza untuk membantu pemahaman visual siswa.'
+            },
+            indo: {
+                mataPelajaran: 'Bahasa Indonesia',
+                kelasFase: 'X / Fase E',
+                materiTopik: 'Teks Laporan Hasil Observasi (LHO)',
+                tujuanPembelajaran: 'Mengevaluasi gagasan dan pandangan berdasarkan kaidah kebahasaan teks LHO',
+                alokasiWaktu: '90 menit',
+                jumlahPeserta: '35 siswa',
+                cakupanMateri: 'Sumatif Lingkup Materi (Bab)',
+                bentukAsesmen: 'Pilihan Ganda, MCMA & Uraian',
+                jumlahSoal: '10',
+                tingkatKesulitan: 'Dominan Sulit (HOTS Focus)',
+                bahasaSoal: 'Bahasa Indonesia',
+                preferensiLain: 'Sertakan kutipan teks bacaan observasi tentang flora khas Indonesia sebagai stimulus soal.'
+            }
+        };
+
+        function loadPreset(key) {
+            const data = presets[key];
+            if (!data) return;
+
+            document.getElementById('mataPelajaran').value = data.mataPelajaran;
+            document.getElementById('kelasFase').value = data.kelasFase;
+            document.getElementById('materiTopik').value = data.materiTopik;
+            document.getElementById('tujuanPembelajaran').value = data.tujuanPembelajaran;
+            document.getElementById('alokasiWaktu').value = data.alokasiWaktu;
+            document.getElementById('jumlahPeserta').value = data.jumlahPeserta;
+            document.getElementById('cakupanMateri').value = data.cakupanMateri;
+            document.getElementById('bentukAsesmen').value = data.bentukAsesmen;
+            document.getElementById('jumlahSoal').value = data.jumlahSoal;
+            document.getElementById('tingkatKesulitan').value = data.tingkatKesulitan;
+            document.getElementById('bahasaSoal').value = data.bahasaSoal;
+            document.getElementById('preferensiLain').value = data.preferensiLain;
+
+            updateSummary();
+        }
+
+        // Live summary update in Step 4
+        function updateSummary() {
+            document.getElementById('summaryMataPelajaran').innerText = ': ' + document.getElementById('mataPelajaran').value;
+            document.getElementById('summaryKelasFase').innerText = ': ' + document.getElementById('kelasFase').value;
+            document.getElementById('summaryMateriTopik').innerText = ': ' + (document.getElementById('materiTopik').value || '-');
+            document.getElementById('summaryAlokasiWaktu').innerText = ': ' + document.getElementById('alokasiWaktu').value;
+            document.getElementById('summaryJumlahPeserta').innerText = ': ' + (document.getElementById('jumlahPeserta').value || '-');
+            document.getElementById('summaryBentukAsesmen').innerText = ': ' + document.getElementById('bentukAsesmen').value;
+            document.getElementById('summaryJumlahSoal').innerText = ': ' + document.getElementById('jumlahSoal').value + ' soal';
+            document.getElementById('summaryBahasaSoal').innerText = ': ' + document.getElementById('bahasaSoal').value;
+
+            // Kognitif summary
+            const kognitifChecked = Array.from(document.querySelectorAll('input[name="kognitif"]:checked')).map(el => el.value);
+            document.getElementById('summaryKognitif').innerText = ': ' + (kognitifChecked.join(' + ') || 'Belum dipilih');
+
+            // Jenis Soal summary
+            const jenisChecked = Array.from(document.querySelectorAll('input[name="jenisSoal"]:checked')).map(el => el.value);
+            document.getElementById('summaryJenisSoal').innerText = ': ' + (jenisChecked.join(', ') || 'Belum dipilih');
+
+            // Pembahasan summary
+            const sertakan = document.getElementById('sertakanPembahasan').checked;
+            document.getElementById('pembahasanLabel').innerText = sertakan ? 'Ya, Sertakan' : 'Tidak';
+            document.getElementById('summaryPembahasan').innerText = sertakan ? ': Ya' : ': Tidak';
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            updateSummary();
+        };
+
+        async function generateAssessment() {
+            const mataPelajaran = document.getElementById('mataPelajaran').value;
+            const kelasFase = document.getElementById('kelasFase').value;
+            const materiTopik = document.getElementById('materiTopik').value;
+            const tujuanPembelajaran = document.getElementById('tujuanPembelajaran').value;
+            const alokasiWaktu = document.getElementById('alokasiWaktu').value;
+            const jumlahPeserta = document.getElementById('jumlahPeserta').value;
+            const cakupanMateri = document.getElementById('cakupanMateri').value;
+            const bentukAsesmen = document.getElementById('bentukAsesmen').value;
+
+            const kognitifList = Array.from(document.querySelectorAll('input[name="kognitif"]:checked')).map(el => el.value).join(', ');
+            const jenisSoalList = Array.from(document.querySelectorAll('input[name="jenisSoal"]:checked')).map(el => el.value).join(', ');
+            const gayaBelajarList = Array.from(document.querySelectorAll('input[name="gayaBelajar"]:checked')).map(el => el.value).join(', ');
+
+            const jumlahSoal = document.getElementById('jumlahSoal').value;
+            const tingkatKesulitan = document.getElementById('tingkatKesulitan').value;
+            const formatOutput = document.getElementById('formatOutput').value;
+            const bahasaSoal = document.getElementById('bahasaSoal').value;
+            const sertakanPembahasan = document.getElementById('sertakanPembahasan').checked;
+            const preferensiLain = document.getElementById('preferensiLain').value;
+
+            // Show Loading
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+
+            const systemPrompt = `Anda adalah seorang ahli pengembang kurikulum dan penyusun asesmen pendidikan profesional Indonesia (Kurikulum Merdeka).
+Tugas Anda adalah membuat dokumen lengkap soal & asesmen pembelajaran berkualitas tinggi, terstruktur, rapi, dan siap dicetak/digunakan oleh guru.
+
+Aturan Penulisan:
+1. Format output HARUS menggunakan Markdown yang bersih dan rapi dengan Heading (#, ##, ###) serta Tabel Markdown.
+2. Gunakan Bahasa yang ramah guru dan sesuai kaidah pendidikan Indonesia.
+3. Sertakan kop judul asesmen lengkap di paling atas (Nama Sekolah Placeholder, Mata Pelajaran, Kelas/Fase, Materi, Alokasi Waktu).
+4. Struktur Dokumen Harus Terbagi Menjadi 3 BAGIAN UTAMA:
+   - **BAGIAN 1: NASKAH SOAL ASESMEN (SIAP CETAK SISWA)**
+     * Berikan instruksi pengerjaan.
+     * Tuliskan soal dengan nomor yang rapi.
+     * Untuk Pilihan Ganda berikan opsi A, B, C, D (atau E jika SMA).
+     * Jika ada Pilihan Ganda Kompleks (MCMA), instruksikan memilih lebih dari satu jawaban benar.
+     * Jika ada Esai, berikan petunjuk jawaban jelas.
+   - **BAGIAN 2: KUNCI JAWABAN DAN PEMBAHASAN LENGKAP** (jika sertakan pembahasan diset 'Ya')
+     * Tuliskan kunci jawaban tiap nomor beserta langkah pembahasan rasionalnya.
+   - **BAGIAN 3: KISI-KISI & RUBRIK PENILAIAN**
+     * Tabel Kisi-Kisi Soal (Nomor Soal, Tujuan Pembelajaran, Indikator Soal, Level Kognitif [LOTS/MOTS/HOTS], Bentuk Soal).
+     * Rubrik Penilaian Skor/Nilai Akhir (Rumus Perhitungan Nilai 0-100).`;
+
+            const userPrompt = `Buatkan Dokumen Asesmen Pembelajaran dengan rincian parameter berikut:
+
+1. **Informasi Dasar**:
+   - Mata Pelajaran: ${mataPelajaran}
+   - Kelas / Fase: ${kelasFase}
+   - Materi / Topik: ${materiTopik}
+   - Tujuan Pembelajaran: ${tujuanPembelajaran}
+   - Alokasi Waktu: ${alokasiWaktu}
+   - Jumlah Peserta Didik: ${jumlahPeserta}
+   - Cakupan Materi: ${cakupanMateri}
+   - Bentuk Asesmen: ${bentukAsesmen}
+
+2. **Karakteristik & Tujuan**:
+   - Tingkat Kognitif Target: ${kognitifList || 'LOTS, MOTS, HOTS'}
+   - Jenis Soal Diminta: ${jenisSoalList || 'Pilihan Ganda & Uraian'}
+   - Gaya Belajar Siswa: ${gayaBelajarList || 'Visual'}
+
+3. **Struktur Soal**:
+   - Total Jumlah Soal: ${jumlahSoal} soal
+   - Tingkat Kesulitan: ${tingkatKesulitan}
+   - Format Output: ${formatOutput}
+   - Bahasa Soal: ${bahasaSoal}
+   - Sertakan Pembahasan: ${sertakanPembahasan ? 'Ya, sertakan pembahasan rinci' : 'Tidak perlu pembahasan'}
+   - Catatan / Preferensi Tambahan: ${preferensiLain || 'Tidak ada'}
+
+Buatkan dokumen asesmen yang komprehensif, inspiratif, kontekstual, dan siap dipakai!`;
+
+            const apiKey = ""; // Canvas runtime automatically supplies key
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
+
+            let attempts = 0;
+            const maxAttempts = 3;
+            let success = false;
+            let resultText = "";
+
+            while (attempts < maxAttempts && !success) {
+                try {
+                    attempts++;
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    const candidate = data.candidates?.[0];
+                    if (candidate && candidate.content?.parts?.[0]?.text) {
+                        resultText = candidate.content.parts[0].text;
+                        success = true;
+                    } else {
+                        throw new Error("Respon AI tidak berisi teks yang valid.");
+                    }
+                } catch (err) {
+                    console.warn(`Attempt ${attempts} failed:`, err);
+                    if (attempts < maxAttempts) {
+                        await new Promise(res => setTimeout(res, Math.pow(2, attempts) * 1000));
+                    }
+                }
+            }
+
+            document.getElementById('loadingOverlay').classList.add('hidden');
+
+            if (success) {
+                // Parse markdown to HTML
+                const parsedHtml = marked.parse(resultText);
+                document.getElementById('printableArea').innerHTML = parsedHtml;
+                
+                // Show result section & scroll smoothly
+                const resultSection = document.getElementById('resultSection');
+                resultSection.classList.remove('hidden');
+                resultSection.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                alert("Gagal menghubungkan ke layanan Teacher AI Generator. Mohon periksa koneksi internet Anda dan coba beberapa saat lagi.");
+            }
+        }
+
+        // EXPORT TO WORD FUNCTION
+        function exportToWord() {
+            const content = document.getElementById('printableArea').innerHTML;
+            if (!content || content.trim() === "") {
+                alert("Tidak ada konten soal yang dapat diunduh!");
+                return;
+            }
+
+            const header = `<html xmlns:o='urn:schemas-microsoft-microsoft-com:office:office' ` +
+                `xmlns:w='urn:schemas-microsoft-microsoft-com:office:word' ` +
+                `xmlns='http://www.w3.org/TR/REC-html40'>` +
+                `<head><meta charset='utf-8'><title>Soal & Asesmen - Teacher AI</title>` +
+                `<style>` +
+                `body { font-family: 'Calibri', 'Arial', sans-serif; font-size: 11pt; line-height: 1.5; color: #111827; } ` +
+                `h1 { font-size: 16pt; font-weight: bold; color: #1e3a8a; border-bottom: 2px solid #1e3a8a; padding-bottom: 4px; } ` +
+                `h2 { font-size: 13pt; font-weight: bold; color: #1d4ed8; margin-top: 18px; } ` +
+                `h3 { font-size: 11pt; font-weight: bold; color: #2563eb; } ` +
+                `table { border-collapse: collapse; width: 100%; margin: 12px 0; } ` +
+                `th, td { border: 1px solid #94a3b8; padding: 6px 10px; text-align: left; font-size: 10pt; } ` +
+                `th { background-color: #f1f5f9; font-weight: bold; } ` +
+                `blockquote { border-left: 3px solid #2563eb; background: #eff6ff; padding: 6px 12px; margin: 8px 0; } ` +
+                `</style></head><body>`;
+
+            const footer = `</body></html>`;
+            const sourceHTML = header + content + footer;
+
+            const blob = new Blob(['\ufeff' + sourceHTML], {
+                type: 'application/msword'
+            });
+
+            const matpel = document.getElementById('mataPelajaran').value;
+            const materi = document.getElementById('materiTopik').value || 'Asesmen';
+            const fileName = `Soal_Asesmen_${matpel}_${materi.replace(/[^a-zA-Z0-9]/g, '_')}.doc`;
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // EXPORT TO PDF FUNCTION
+        function exportToPDF() {
+            const element = document.getElementById('printableArea');
+            if (!element || element.innerText.trim() === "") {
+                alert("Tidak ada konten soal yang dapat diunduh!");
+                return;
+            }
+
+            const matpel = document.getElementById('mataPelajaran').value;
+            const materi = document.getElementById('materiTopik').value || 'Asesmen';
+            const fileName = `Soal_Asesmen_${matpel}_${materi.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+
+            const opt = {
+                margin:       [0.5, 0.5, 0.5, 0.5],
+                filename:     fileName,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            // Generate PDF using html2pdf
+            html2pdf().set(opt).from(element).save();
+        }
+
+        // COPY GENERATED TEXT
+        function copyGeneratedText() {
+            const element = document.getElementById('printableArea');
+            if (!element) return;
+
+            const range = document.createRange();
+            range.selectNode(element);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+
+            try {
+                document.execCommand('copy');
+                alert('Teks soal dan asesmen berhasil disalin ke clipboard!');
+            } catch (err) {
+                alert('Gagal menyalin teks.');
+            }
+            window.getSelection().removeAllRanges();
+        }
+    </script>
+</body>
+</html>
